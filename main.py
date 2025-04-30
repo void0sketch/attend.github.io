@@ -1,11 +1,39 @@
 from nicegui import ui
+import os
+from dotenv import load_dotenv
 import gspread
+from google.oauth2.service_account import Credentials
+
+# Load environment variables from .env file
+load_dotenv()
+
+# Build credentials dictionary from environment variables
+credentials_dict = {
+    "type": os.getenv("TYPE"),
+    "project_id": os.getenv("PROJECT_ID"),
+    "private_key_id": os.getenv("PRIVATE_KEY_ID"),
+    "private_key": os.getenv("PRIVATE_KEY").replace("\\n", "\n"),
+    "client_email": os.getenv("CLIENT_EMAIL"),
+    "client_id": os.getenv("CLIENT_ID"),
+    "auth_uri": os.getenv("AUTH_URI"),
+    "token_uri": os.getenv("TOKEN_URI"),
+    "auth_provider_x509_cert_url": os.getenv("AUTH_PROVIDER_X509_CERT_URL"),
+    "client_x509_cert_url": os.getenv("CLIENT_X509_CERT_URL"),
+    "universe_domain": os.getenv("UNIVERSE_DOMAIN")
+}
+
+# Define required Google API scopes
+scopes = [
+    'https://www.googleapis.com/auth/spreadsheets',
+    'https://www.googleapis.com/auth/drive'
+]
+
+# Authorize Google Sheets client with scopes
+credentials = Credentials.from_service_account_info(credentials_dict, scopes=scopes)
+gc = gspread.authorize(credentials)
 
 # Google Sheets setup
-SHEET_NAME = 'User Data'  # Replace with your actual sheet name
-CREDENTIALS_FILE = 'credentials.json'  # Make sure this matches your file
-
-gc = gspread.service_account(filename=CREDENTIALS_FILE)
+SHEET_NAME = 'User Data'
 sh = gc.open(SHEET_NAME)
 worksheet = sh.sheet1
 
